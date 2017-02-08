@@ -12,10 +12,6 @@
   Handles empty requests in a defined manner.
   Handle requests for non-exisiting pages correctly.
 
-  This demo allows to switch two functions:
-  Function 1 creates serial output and toggels GPIO2
-  Function 2 just creates serial output.
-
   Serial output can e.g. be used to steer an attached
   Arduino, Raspberry etc.
   --------------------------------------------------*/
@@ -41,7 +37,7 @@ boolean function1;
 boolean function2;
 
 const char* ssid = "DD8ZJ";
-const char* password = "xxxx";
+const char* password = "";
 
 //unsigned long ulReqcount;
 //unsigned long ulReconncount;
@@ -60,11 +56,11 @@ void setup()
   button_color_function2 = COLOR_RED;
   background_color = COLOR_LIGHT_BLUE;
   font_color = COLOR_BLACK;
-  
+
   //ulReqcount=0;
   //ulReconncount=0;
 
-   // prepare GPIO1
+  // prepare GPIO1
   pinMode(1, OUTPUT);
   digitalWrite(1, 0);
 
@@ -79,9 +75,9 @@ void setup()
   // inital connect
   WiFi.mode(WIFI_STA);
   WiFiStart();
-  
-}
 
+}
+//--------------------------------------------------------------------------------------------------------------------------------------
 void WiFiStart()
 {
   // ulReconncount++;
@@ -109,16 +105,15 @@ void WiFiStart()
   Serial.println(WiFi.localIP());
 }
 
+//--------------------------------------------------------------------------------------------------------------------------------------
 void loop()
 {
-  // check if WLAN is connected
-  if (WiFi.status() != WL_CONNECTED)
+  if (WiFi.status() != WL_CONNECTED)                                //when not connected to a WiFi
   {
     WiFiStart();
   }
 
-  // Check if a client has connected
-  WiFiClient client = server.available();
+  WiFiClient client = server.available();                           //a Client object, if no client is connected ---> NULL
   if (!client)
   {
     return;
@@ -127,7 +122,7 @@ void loop()
   // Wait until the client sends some data
   //Serial.println("new client");
   unsigned long ultimeout = millis() + 250;
-  while (!client.available() && (millis() < ultimeout) )
+  while (!client.available() && (millis() < ultimeout) )            //returns the amount of data that has been written to the client by the server it is connected to && wait 250ms
   {
     delay(1);
   }
@@ -138,15 +133,15 @@ void loop()
   }
 
   // Read the first line of the request
-  String sRequest = client.readStringUntil('\r');
- // Serial.println("Client_Request:" + sRequest);
-  client.flush();
+  String sRequest = client.readStringUntil('\r');                   //Read the next String received from the server the client is connected to
+  // Serial.println("Client_Request:" + sRequest);
+  client.flush();                                                   //Discard any bytes that have been written to the client but not yet read
 
   // stop client, if request is empty
   if (sRequest == "")
   {
-   // Serial.println("empty request! - stopping client");
-    client.stop();
+    // Serial.println("empty request! - stopping client");
+    client.stop();                                                  //Disconnect from the server
     return;
   }
 
@@ -192,7 +187,7 @@ void loop()
     }
   }
 
-
+  //-------------------------------------------------------------------------------------------------------------------------------------------------
   ///////////////////////////
   // format the html response
   ///////////////////////////
@@ -220,7 +215,7 @@ void loop()
   {
     //ulReqcount++;
     sResponse  = "<html><head><title>ESP8266 Steuerung</title></head><body>\r\n";
-    sResponse += "<font color=\"" +font_color + "\"><body bgcolor=\"" + background_color + "\">\r\n";
+    sResponse += "<font color=\"" + font_color + "\"><body bgcolor=\"" + background_color + "\">\r\n";
     sResponse += "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, user-scalable=yes\">\r\n";
     sResponse += "<meta http-equiv=\"refresh\" content=\"5\">\r\n";
     sResponse += "<h1>ESP8266 Steuerung</h1>\r\n";
@@ -230,8 +225,8 @@ void loop()
     //////////////////////
     // react on parameters
     //////////////////////
-    
-    if(sCmd.length() > 0)
+
+    if (sCmd.length() > 0)
     {
       // write received command to html page
       sResponse += "Letztes Kommando: " + sCmd + "<BR><BR>";
@@ -260,19 +255,19 @@ void loop()
     }
     else sResponse += "<BR><BR>";
 
-    if (function1 == false){
+    if (function1 == false) {
       sResponse += "Funktion 1:&nbsp;&nbsp;&nbsp;&nbsp;<input type = button onClick = \"location.href='?pin=FUNCTION1ON'\" value = 'Einschalten&nbsp;' style = \"background-color:" + button_color_function1 + ";font-family:Arial;font-size:15px;\"><BR>\r\n";
     }
-    else if (function1 == true){
-       sResponse += "Funktion 1:&nbsp;&nbsp;&nbsp;&nbsp;<input type = button onClick = \"location.href='?pin=FUNCTION1OFF'\" value = 'Ausschalten' style = \"background-color:" + button_color_function1 + ";font-family:Arial;font-size:15px;\"><BR>\r\n";
+    else if (function1 == true) {
+      sResponse += "Funktion 1:&nbsp;&nbsp;&nbsp;&nbsp;<input type = button onClick = \"location.href='?pin=FUNCTION1OFF'\" value = 'Ausschalten' style = \"background-color:" + button_color_function1 + ";font-family:Arial;font-size:15px;\"><BR>\r\n";
     }
-    if (function2 == false){
+    if (function2 == false) {
       sResponse += "Funktion 2:&nbsp;&nbsp;&nbsp;&nbsp;<input type = button onClick = \"location.href='?pin=FUNCTION2ON'\" value = 'Einschalten&nbsp;' style = \"background-color:" + button_color_function2 + ";font-family:Arial;font-size:15px;\"><BR>\r\n";
     }
-    else if (function2 == true){
-       sResponse += "Funktion 2:&nbsp;&nbsp;&nbsp;&nbsp;<input type = button onClick = \"location.href='?pin=FUNCTION2OFF'\" value = 'Ausschalten' style = \"background-color:" + button_color_function2 + ";font-family:Arial;font-size:15px;\"><BR>\r\n";
+    else if (function2 == true) {
+      sResponse += "Funktion 2:&nbsp;&nbsp;&nbsp;&nbsp;<input type = button onClick = \"location.href='?pin=FUNCTION2OFF'\" value = 'Ausschalten' style = \"background-color:" + button_color_function2 + ";font-family:Arial;font-size:15px;\"><BR>\r\n";
     }
-    
+
     /* sResponse += "<FONT SIZE=-2>";
        sResponse += "<BR>Aufrufz&auml;hler=";
        sResponse += ulReqcount;
@@ -290,11 +285,10 @@ void loop()
     sHeader += "\r\n";
   }
 
-  // Send the response to the client
-  client.print(sHeader);
-  client.print(sResponse);
+  client.print(sHeader);                                              //Print data to the server that a client is connected to
+  client.print(sResponse);                                            //Print data to the server that a client is connected to
 
   // and stop the client
-  client.stop();
- // Serial.println("Client stopped");
+  client.stop();                                                      //Disconnect from the server
+  // Serial.println("Client stopped");
 }
