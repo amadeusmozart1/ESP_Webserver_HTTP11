@@ -65,8 +65,8 @@ void setup()
   digitalWrite(1, 0);
 
   // prepare GPIO2
-  pinMode(2, OUTPUT);
-  digitalWrite(2, 0);
+  pinMode(2, INPUT);
+ // digitalWrite(2, 0);
 
   // start serial
   Serial.begin(9600);
@@ -105,7 +105,7 @@ void WiFiStart()
   Serial.println(WiFi.localIP());
 }
 
-//--------------------------------------------------------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------------------------------------------------------
 void loop()
 {
   if (WiFi.status() != WL_CONNECTED)                                //when not connected to a WiFi
@@ -184,6 +184,10 @@ void loop()
     {
       sCmd = sParam.substring(iEqu + 1, sParam.length());
       Serial.println(sCmd);
+      Serial.flush();
+
+      while(digitalRead(2) == LOW);
+
     }
   }
 
